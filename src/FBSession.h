@@ -630,6 +630,42 @@ __attribute__((deprecated));
 + (BOOL)openActiveSessionWithReadPermissions:(NSArray*)readPermissions
                                 allowLoginUI:(BOOL)allowLoginUI
                            completionHandler:(FBSessionStateHandler)handler;
+/*!
+ @abstract
+ This is a simple method for opening a session with Facebook. Using sessionOpen logs on a user,
+ and sets the static activeSession which becomes the default session object for any Facebook UI widgets
+ used by the application. This session becomes the active session, whether open succeeds or fails.
+ 
+ @param readPermissions     An array of strings representing the read permissions to request during the
+ authentication flow. A value of nil indicates basic permissions. It is not allowed to pass publish
+ permissions to this method.
+ 
+ @param allowLoginUI    Sometimes it is useful to attempt to open a session, but only if
+ no login UI will be required to accomplish the operation. For example, at application startup it may not
+ be desirable to transition to login UI for the user, and yet an open session is desired so long as a cached
+ token can be used to open the session. Passing NO to this argument, assures the method will not present UI
+ to the user in order to open the session.
+ 
+ @param sessionLoginBehavior How logging in will be performed. Use this, for example, to force Facebook.app or
+ Safari login when the user has disabled permission for your app to access system Facebook account.
+ 
+ @param handler                 Many applications will benefit from notification when a session becomes invalid
+ or undergoes other state transitions. If a block is provided, the FBSession
+ object will call the block each time the session changes state.
+ 
+ @discussion
+ Returns true if the session was opened synchronously without presenting UI to the user. This occurs
+ when there is a cached token available from a previous run of the application. If NO is returned, this indicates
+ that the session was not immediately opened, via cache. However, if YES was passed as allowLoginUI, then it is
+ possible that the user will login, and the session will become open asynchronously. The primary use for
+ this return value is to switch-on facebook capabilities in your UX upon startup, in the case were the session
+ is opened via cache.
+ 
+ */
++ (BOOL)openActiveSessionWithReadPermissions:(NSArray*)readPermissions
+                                allowLoginUI:(BOOL)allowLoginUI
+						sessionLoginBehavior:(FBSessionLoginBehavior)sessionLoginBehavior
+                           completionHandler:(FBSessionStateHandler)handler;
 
 /*!
  @abstract
@@ -665,6 +701,45 @@ __attribute__((deprecated));
 + (BOOL)openActiveSessionWithPublishPermissions:(NSArray*)publishPermissions
                                 defaultAudience:(FBSessionDefaultAudience)defaultAudience
                                    allowLoginUI:(BOOL)allowLoginUI
+                              completionHandler:(FBSessionStateHandler)handler;
+/*!
+ @abstract
+ This is a simple method for opening a session with Facebook. Using sessionOpen logs on a user,
+ and sets the static activeSession which becomes the default session object for any Facebook UI widgets
+ used by the application. This session becomes the active session, whether open succeeds or fails.
+ 
+ @param publishPermissions     An array of strings representing the publish permissions to request during the
+ authentication flow.
+ 
+ @param defaultAudience     Anytime an app publishes on behalf of a user, the post must have an audience (e.g. me, my friends, etc.)
+ The default audience is used to notify the user of the cieling that the user agrees to grant to the app for the provided permissions.
+ 
+ @param allowLoginUI    Sometimes it is useful to attempt to open a session, but only if
+ no login UI will be required to accomplish the operation. For example, at application startup it may not
+ be desirable to transition to login UI for the user, and yet an open session is desired so long as a cached
+ token can be used to open the session. Passing NO to this argument, assures the method will not present UI
+ to the user in order to open the session.
+
+ @param sessionLoginBehavior How logging in will be performed. Use this, for example, to force Facebook.app or
+ Safari login when the user has disabled permission for your app to access system Facebook account.
+
+ @param handler                 Many applications will benefit from notification when a session becomes invalid
+ or undergoes other state transitions. If a block is provided, the FBSession
+ object will call the block each time the session changes state.
+ 
+ @discussion
+ Returns true if the session was opened synchronously without presenting UI to the user. This occurs
+ when there is a cached token available from a previous run of the application. If NO is returned, this indicates
+ that the session was not immediately opened, via cache. However, if YES was passed as allowLoginUI, then it is
+ possible that the user will login, and the session will become open asynchronously. The primary use for
+ this return value is to switch-on facebook capabilities in your UX upon startup, in the case were the session
+ is opened via cache.
+ 
+ */
++ (BOOL)openActiveSessionWithPublishPermissions:(NSArray*)publishPermissions
+                                defaultAudience:(FBSessionDefaultAudience)defaultAudience
+                                   allowLoginUI:(BOOL)allowLoginUI
+						   sessionLoginBehavior:(FBSessionLoginBehavior)sessionLoginBehavior
                               completionHandler:(FBSessionStateHandler)handler;
 
 /*!
