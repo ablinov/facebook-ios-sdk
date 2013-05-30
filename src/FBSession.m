@@ -575,19 +575,6 @@ static FBSession *g_activeSession = nil;
                                      completionHandler:handler];
 }
 
-+ (BOOL)openActiveSessionWithReadPermissions:(NSArray*)readPermissions
-                                allowLoginUI:(BOOL)allowLoginUI
-						sessionLoginBehavior:(FBSessionLoginBehavior)sessionLoginBehavior
-                           completionHandler:(FBSessionStateHandler)handler
-{
-	return [FBSession openActiveSessionWithPermissions:readPermissions
-                                          allowLoginUI:allowLoginUI
-								  sessionLoginBehavior:sessionLoginBehavior
-                                                isRead:YES
-                                       defaultAudience:FBSessionDefaultAudienceNone
-                                     completionHandler:handler];
-}
-
 + (BOOL)openActiveSessionWithPublishPermissions:(NSArray*)publishPermissions
                                 defaultAudience:(FBSessionDefaultAudience)defaultAudience
                                    allowLoginUI:(BOOL)allowLoginUI
@@ -595,20 +582,6 @@ static FBSession *g_activeSession = nil;
     return [FBSession openActiveSessionWithPermissions:publishPermissions
                                           allowLoginUI:allowLoginUI
                                     allowSystemAccount:YES
-                                                isRead:NO
-                                       defaultAudience:defaultAudience
-                                     completionHandler:handler];
-}
-
-+ (BOOL)openActiveSessionWithPublishPermissions:(NSArray*)publishPermissions
-                                defaultAudience:(FBSessionDefaultAudience)defaultAudience
-                                   allowLoginUI:(BOOL)allowLoginUI
-						   sessionLoginBehavior:(FBSessionLoginBehavior)sessionLoginBehavior
-                              completionHandler:(FBSessionStateHandler)handler;
-{
-	return [FBSession openActiveSessionWithPermissions:publishPermissions
-                                          allowLoginUI:allowLoginUI
-								  sessionLoginBehavior:sessionLoginBehavior
                                                 isRead:NO
                                        defaultAudience:defaultAudience
                                      completionHandler:handler];
@@ -938,7 +911,7 @@ static FBSession *g_activeSession = nil;
         
         [self authorizeUsingSystemAccountStore:permissions
                                defaultAudience:defaultAudience
-								 isReauthorize:isReauthorize];
+                                  isReauthorize:isReauthorize];
     }
 
     // if the device is running a version of iOS that supports multitasking,
@@ -1605,31 +1578,10 @@ static FBSession *g_activeSession = nil;
                                   isRead:(BOOL)isRead
                          defaultAudience:(FBSessionDefaultAudience)defaultAudience
                        completionHandler:(FBSessionStateHandler)handler {
-	FBSessionLoginBehavior howToBehave = allowSystemAccount ?
-		FBSessionLoginBehaviorUseSystemAccountIfPresent :
-		FBSessionLoginBehaviorWithFallbackToWebView;
-
-	return [FBSession openActiveSessionWithPermissions:permissions
-										  allowLoginUI:allowLoginUI
-								  sessionLoginBehavior:howToBehave
-												isRead:isRead
-									   defaultAudience:defaultAudience
-									 completionHandler:handler];
-}
-
-
-+ (BOOL)openActiveSessionWithPermissions:(NSArray*)permissions
-							allowLoginUI:(BOOL)allowLoginUI
-					sessionLoginBehavior:(FBSessionLoginBehavior)sessionLoginBehavior
-								  isRead:(BOOL)isRead
-						 defaultAudience:(FBSessionDefaultAudience)defaultAudience
-					   completionHandler:(FBSessionStateHandler)handler {
-	BOOL isAllowedToUseSystemAccount = (sessionLoginBehavior == FBSessionLoginBehaviorUseSystemAccountIfPresent);
-	
-	// is everything in good order?
+    // is everything in good order?
     [FBSession validateRequestForPermissions:permissions
                              defaultAudience:defaultAudience
-                          allowSystemAccount:isAllowedToUseSystemAccount
+                          allowSystemAccount:allowSystemAccount
                                       isRead:isRead];
     BOOL result = NO;
     FBSession *session = [[[FBSession alloc] initWithAppID:nil
@@ -1642,7 +1594,10 @@ static FBSession *g_activeSession = nil;
         [FBSession setActiveSession:session];
         // we open after the fact, in order to avoid overlapping close
         // and open handler calls for blocks
-        [session openWithBehavior:sessionLoginBehavior
+        FBSessionLoginBehavior howToBehave = allowSystemAccount ?
+                                                FBSessionLoginBehaviorUseSystemAccountIfPresent :
+                                                    FBSessionLoginBehaviorWithFallbackToWebView;
+        [session openWithBehavior:howToBehave
                 completionHandler:handler];
         result = session.isOpen;
     }
