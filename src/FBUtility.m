@@ -22,6 +22,8 @@
 #import "FBSession.h"
 #import "FBDynamicFrameworkLoader.h"
 #import "FBSettings.h"
+#import "JSON/FBSBJsonParser.h"
+#import "JSON/FBSBJsonWriter.h"
 
 #import <AdSupport/AdSupport.h>
 #include <sys/time.h>
@@ -374,13 +376,32 @@ static NSDate *g_fetchedAppSettingsTimestamp = nil;
 + (NSString *)simpleJSONEncode:(id)data
                          error:(NSError **)error
                 writingOptions:(NSJSONWritingOptions)writingOptions {
+
+    static BOOL isIOS4;
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^
+                  {
+                      isIOS4 = ([[[UIDevice currentDevice] systemVersion] compare:@"5.0" options:NSNumericSearch] == NSOrderedAscending);
+                  });
+    
+
     if (data) {
-        NSData *json = [NSJSONSerialization dataWithJSONObject:data
-                                                       options:writingOptions
-                                                         error:error];
-        return [[[NSString alloc] initWithData:json
-                                      encoding:NSUTF8StringEncoding]
-                autorelease];
+        if (!isIOS4)
+        {
+            NSData *json = [NSJSONSerialization dataWithJSONObject:data
+                                                           options:writingOptions
+                                                             error:error];
+            return [[[NSString alloc] initWithData:json
+                                          encoding:NSUTF8StringEncoding]
+                    autorelease];
+        }
+        else
+        {
+            FBSBJsonWriter* writer = [[[FBSBJsonWriter alloc] init] autorelease];
+            
+            return [writer stringWithObject:data];
+        }
     } else {
         return nil;
     }
@@ -392,10 +413,31 @@ static NSDate *g_fetchedAppSettingsTimestamp = nil;
 
 + (id)simpleJSONDecode:(NSString *)jsonEncoding
                  error:(NSError **)error {
+    static BOOL isIOS4;
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^
+    {
+        isIOS4 = ([[[UIDevice currentDevice] systemVersion] compare:@"5.0" options:NSNumericSearch] == NSOrderedAscending);
+    });
+    
     NSData *data = [jsonEncoding dataUsingEncoding:NSUTF8StringEncoding];
     
     if (data) {
-        return [NSJSONSerialization JSONObjectWithData:data options:0 error:error];
+        if (!isIOS4) {
+            return [NSJSONSerialization JSONObjectWithData:data options:0 error:error];
+        }
+        else {
+            FBSBJsonParser* parser = [[[FBSBJsonParser alloc] init] autorelease];
+            id retVal = [parser objectWithString:jsonEncoding];
+            
+            if (!retVal && error)
+            {
+                *error = [NSError errorWithDomain:@"FBSBJsonParser" code:1 userInfo:@{@"message": [NSString stringWithFormat:@"Could not parse %@", jsonEncoding]}];
+            }
+            
+            return retVal;
+        }
     } else {
         return nil;
     }

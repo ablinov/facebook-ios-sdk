@@ -586,6 +586,19 @@ static FBSession *g_activeSession = nil;
 
 + (BOOL)openActiveSessionWithReadPermissions:(NSArray*)readPermissions
                                 allowLoginUI:(BOOL)allowLoginUI
+                          allowSystemAccount:(BOOL)allowSystemAccount
+                           completionHandler:(FBSessionStateHandler)handler
+{
+    return [FBSession openActiveSessionWithPermissions:readPermissions
+                                          allowLoginUI:allowLoginUI
+                                    allowSystemAccount:allowSystemAccount
+                                                isRead:YES
+                                       defaultAudience:FBSessionDefaultAudienceNone
+                                     completionHandler:handler];
+}
+
++ (BOOL)openActiveSessionWithReadPermissions:(NSArray*)readPermissions
+                                allowLoginUI:(BOOL)allowLoginUI
                            completionHandler:(FBSessionStateHandler)handler {
     return [FBSession openActiveSessionWithPermissions:readPermissions
                                           allowLoginUI:allowLoginUI

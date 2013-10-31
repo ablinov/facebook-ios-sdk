@@ -632,6 +632,12 @@ __attribute__((deprecated));
                                 allowLoginUI:(BOOL)allowLoginUI
                            completionHandler:(FBSessionStateHandler)handler;
 
+
++ (BOOL)openActiveSessionWithReadPermissions:(NSArray*)permissions
+                            allowLoginUI:(BOOL)allowLoginUI
+                      allowSystemAccount:(BOOL)allowSystemAccount
+                       completionHandler:(FBSessionStateHandler)handler;
+
 /*!
  @abstract
  This is a simple method for opening a session with Facebook. Using sessionOpen logs on a user,

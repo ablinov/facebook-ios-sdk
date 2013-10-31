@@ -65,4 +65,5 @@ extern NSString *const FacebookNativeApplicationLoginDomain;
                             allowLoginUI:(BOOL)allowLoginUI
                          defaultAudience:(FBSessionDefaultAudience)defaultAudience
                        completionHandler:(FBSessionStateHandler)handler;
+
 @end

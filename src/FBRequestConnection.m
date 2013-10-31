@@ -1108,7 +1108,9 @@ typedef enum FBRequestConnectionState {
                     id value = [itemDictionary objectForKey:key];
                     if ([key isEqualToString:@"body"]) {
                         id body = [self parseJSONOrOtherwise:value error:&batchResultError];
-                        [result setObject:body forKey:key];
+                        if (body) {
+                            [result setObject:body forKey:key];
+                        }
                     } else {
                         [result setObject:value forKey:key];
                     }
